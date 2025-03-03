@@ -1,0 +1,106 @@
+.card {
+    background: var(--bs-dark);
+    border-radius: 1rem;
+}
+
+.form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.btn-primary:disabled {
+    cursor: not-allowed;
+}
+
+.alert {
+    border-radius: 0.5rem;
+}
+
+.spinner-border {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.5rem;
+}
+
+#imageGrid .card {
+    transition: transform 0.2s;
+    height: 100%;
+    cursor: pointer;
+}
+
+#imageGrid .card:hover {
+    transform: scale(1.02);
+}
+
+#imageGrid .card-img-wrapper {
+    position: relative;
+    padding-top: 75%; /* 4:3 aspect ratio by default */
+    overflow: hidden;
+    border-radius: 1rem 1rem 0 0;
+}
+
+#imageGrid .card-img-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: var(--bs-dark);
+}
+
+#imageGrid .card-body {
+    padding: 1rem;
+}
+
+.image-dimensions {
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+}
+
+/* Modal styles */
+.image-preview-modal {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.image-preview-modal .modal-content {
+    background: transparent;
+    border: none;
+}
+
+.image-preview-modal img {
+    max-width: 100%;
+    max-height: 90vh;
+    margin: 0 auto;
+}
+
+.image-preview-modal .btn-close {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    z-index: 1050;
+    color: white;
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.preview-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+}
+
+.preview-container img,
+.preview-container video {
+    max-width: 100%;
+    max-height: 80vh;
+    margin: 0 auto;
+}
+
+.preview-actions {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.5);
+    position: sticky;
+    bottom: 0;
+}
