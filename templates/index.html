@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce Banner Scraper</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card border-0 shadow">
+                    <div class="card-body p-4">
+                        <h1 class="text-center mb-4">
+                            <i class="fas fa-images me-2"></i>
+                            Appbrew Content Scraper
+                        </h1>
+
+                        <form id="scrapeForm" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label for="url" class="form-label">Website URL</label>
+                                <input type="url" class="form-control" id="url" name="url" 
+                                       placeholder="https://example.com" required>
+                                <div class="invalid-feedback">
+                                    Please enter a valid URL
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="folder_name" class="form-label">Folder Name</label>
+                                <input type="text" class="form-control" id="folder_name" name="folder_name" 
+                                       placeholder="my_banners" required>
+                                <div class="invalid-feedback">
+                                    Please enter a folder name
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <button class="btn btn-link p-0 text-decoration-none" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#filterRules">
+                                    <i class="fas fa-cog me-2"></i>Advanced Filter Options
+                                </button>
+
+                                <div class="collapse mt-3" id="filterRules">
+                                    <div class="card card-body bg-dark">
+                                        <div class="mb-3">
+                                            <label for="includeTerms" class="form-label">Include Terms</label>
+                                            <input type="text" class="form-control" id="includeTerms" name="include_terms" 
+                                                   placeholder="banner, hero, slider (comma-separated)">
+                                            <div class="form-text">Images must contain at least one of these terms</div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="excludeTerms" class="form-label">Exclude Terms</label>
+                                            <input type="text" class="form-control" id="excludeTerms" name="exclude_terms" 
+                                                   placeholder="product, thumbnail (comma-separated)">
+                                            <div class="form-text">Images containing any of these terms will be excluded</div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="minWidth" class="form-label">Min Width (px)</label>
+                                                <input type="number" class="form-control" id="minWidth" name="min_width" 
+                                                       value="100" min="1">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="minHeight" class="form-label">Min Height (px)</label>
+                                                <input type="number" class="form-control" id="minHeight" name="min_height" 
+                                                       value="100" min="1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100" id="scrapeBtn">
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                <span class="btn-text">Start Scraping</span>
+                            </button>
+                        </form>
+
+                        <div id="result" class="mt-4 d-none">
+                            <div class="alert alert-success" role="alert">
+                                <h4 class="alert-heading mb-2">Scraping Complete!</h4>
+                                <p id="resultMessage" class="mb-2"></p>
+                                <button id="downloadBtn" class="btn btn-success mt-2">
+                                    <i class="fas fa-download me-2"></i>Download All Images
+                                </button>
+                            </div>
+                            <div id="imageGrid" class="row g-4 mt-2">
+                                <!-- Media will be inserted here -->
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Media Types</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="formats" value="jpg,jpeg,png" id="images" checked>
+                                    <label class="form-check-label" for="images">Images (JPG, PNG)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="formats" value="gif" id="gifs">
+                                    <label class="form-check-label" for="gifs">GIFs</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="formats" value="mp4" id="videos">
+                                    <label class="form-check-label" for="videos">Videos (MP4)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="error" class="mt-4 d-none">
+                            <div class="alert alert-danger" role="alert">
+                                <h4 class="alert-heading mb-2">Error</h4>
+                                <p id="errorMessage"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div class="modal fade image-preview-modal" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div id="previewImage" class="preview-container"></div>
+                <div class="preview-actions">
+                    <button type="button" class="btn btn-primary" id="downloadSingleImage">
+                        <i class="fas fa-download me-2"></i>Download Image
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
