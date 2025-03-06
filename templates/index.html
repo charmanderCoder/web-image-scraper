@@ -47,6 +47,16 @@
                                 <div class="collapse mt-3" id="filterRules">
                                     <div class="card card-body bg-dark">
                                         <div class="mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" id="disableFilters" name="disable_filters">
+                                                <label class="form-check-label" for="disableFilters">
+                                                    Scrape all images (disable filtering)
+                                                </label>
+                                                <div class="form-text">When enabled, all images will be scraped without any filtering</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
                                             <label for="includeTerms" class="form-label">Include Terms</label>
                                             <input type="text" class="form-control" id="includeTerms" name="include_terms" 
                                                    placeholder="banner, hero, slider (comma-separated)">
@@ -76,10 +86,12 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100" id="scrapeBtn">
-                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                <span class="btn-text">Start Scraping</span>
-                            </button>
+                            <div class="mb-3">
+                                <button type="submit" class="btn btn-primary w-100" id="scrapeBtn">
+                                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                    <span class="btn-text">Start Scraping</span>
+                                </button>
+                            </div>
                         </form>
 
                         <div id="result" class="mt-4 d-none">
@@ -90,24 +102,27 @@
                                     <i class="fas fa-download me-2"></i>Download All Images
                                 </button>
                             </div>
-                            <div id="imageGrid" class="row g-4 mt-2">
-                                <!-- Media will be inserted here -->
-                            </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Media Types</label>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="formats" value="jpg,jpeg,png" id="images" checked>
-                                    <label class="form-check-label" for="images">Images (JPG, PNG)</label>
+                                <label class="form-label">Filter by Media Type</label>
+                                <div class="btn-group w-100" role="group" id="mediaTypeFilters">
+                                    <button type="button" class="btn btn-outline-primary active" data-media-type="all">
+                                        <i class="fas fa-layer-group me-2"></i>All
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" data-media-type="image">
+                                        <i class="fas fa-image me-2"></i>Images
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" data-media-type="gif">
+                                        <i class="fas fa-film me-2"></i>GIFs
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" data-media-type="video">
+                                        <i class="fas fa-video me-2"></i>Videos
+                                    </button>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="formats" value="gif" id="gifs">
-                                    <label class="form-check-label" for="gifs">GIFs</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="formats" value="mp4" id="videos">
-                                    <label class="form-check-label" for="videos">Videos (MP4)</label>
-                                </div>
+                            </div>
+
+                            <div id="imageGrid" class="row g-4 mt-2">
+                                <!-- Media will be inserted here dynamically -->
                             </div>
                         </div>
 
@@ -115,6 +130,8 @@
                             <div class="alert alert-danger" role="alert">
                                 <h4 class="alert-heading mb-2">Error</h4>
                                 <p id="errorMessage"></p>
+                                <hr>
+                                <p class="mb-0">Technical Details: <span id="errorDetails" class="font-monospace"></span></p>
                             </div>
                         </div>
                     </div>
