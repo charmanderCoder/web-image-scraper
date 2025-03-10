@@ -169,39 +169,95 @@ class ImageScraper:
         self.minimal_size = 10  # Minimal size in pixels when no filters are applied
 
     def get_image_url(self, img_tag):
-        """Extract image URL from various tag attributes"""
+        """Extract highest quality image URL from various tag attributes"""
+        def parse_srcset(srcset_str):
+            """Parse srcset string and return the highest quality image URL"""
+            try:
+                best_url = None
+                max_width = 0
+                max_pixel_ratio = 0
+
+                for srcset_item in srcset_str.split(','):
+                    parts = srcset_item.strip().split()
+                    if len(parts) >= 2:
+                        url = parts[0]
+                        descriptor = parts[1]
+
+                        # Handle width descriptors (e.g., 800w)
+                        if descriptor.endswith('w'):
+                            try:
+                                width = int(descriptor[:-1])
+                                if width > max_width:
+                                    max_width = width
+                                    best_url = url
+                            except ValueError:
+                                continue
+
+                        # Handle pixel density descriptors (e.g., 2x)
+                        elif descriptor.endswith('x'):
+                            try:
+                                ratio = float(descriptor[:-1])
+                                if ratio > max_pixel_ratio:
+                                    max_pixel_ratio = ratio
+                                    best_url = url
+                            except ValueError:
+                                continue
+
+                # Prefer width-based URLs over pixel ratio-based ones
+                return best_url
+            except Exception as e:
+                logger.warning(f"Error parsing srcset: {str(e)}")
+                return None
+
         # Try different attributes where image URL might be stored
-        for attr in ['src', 'data-src', 'srcset', 'data-srcset', 'data-original', 'data-lazy-src']:
+        for attr in ['srcset', 'data-srcset', 'src', 'data-src', 'data-original', 'data-lazy-src']:
             url = img_tag.get(attr, '')
             if url:
-                # Handle srcset attribute
+                # Handle srcset attributes
                 if 'srcset' in attr:
-                    try:
-                        # Take the highest resolution URL from srcset
-                        srcset_urls = []
-                        for srcset_item in url.split(','):
-                            parts = srcset_item.strip().split()
-                            if len(parts) >= 2:
-                                try:
-                                    width = int(parts[1].replace('w', ''))
-                                    srcset_urls.append((parts[0], width))
-                                except (ValueError, IndexError):
-                                    continue
-                        if srcset_urls:
-                            # Get URL with highest width
-                            return max(srcset_urls, key=lambda x: x[1])[0]
-                        # Fallback to first URL if no width info
-                        return url.split()[0]
-                    except:
-                        continue
-                return url.strip()
+                    high_quality_url = parse_srcset(url)
+                    if high_quality_url:
+                        return high_quality_url.strip()
+                else:
+                    # For regular URLs, check if it's a small preview (contains dimensions)
+                    if any(x in url.lower() for x in ['_100x', '_thumb', '_small', '_mini']):
+                        # Try to find a srcset with better quality
+                        for srcset_attr in ['srcset', 'data-srcset']:
+                            srcset = img_tag.get(srcset_attr)
+                            if srcset:
+                                high_quality_url = parse_srcset(srcset)
+                                if high_quality_url:
+                                    return high_quality_url.strip()
+                    return url.strip()
 
         # Check parent picture element for source tags
         if img_tag.parent and img_tag.parent.name == 'picture':
+            best_source_url = None
+            max_width = 0
+
             for source in img_tag.parent.find_all('source'):
-                url = self.get_image_url(source)
-                if url:
-                    return url
+                # Check srcset in source tags
+                srcset = source.get('srcset', '')
+                if srcset:
+                    url = parse_srcset(srcset)
+                    if url:
+                        # Try to get width from media query
+                        media = source.get('media', '')
+                        if 'min-width' in media:
+                            try:
+                                width = int(''.join(filter(str.isdigit, media)))
+                                if width > max_width:
+                                    max_width = width
+                                    best_source_url = url
+                            except ValueError:
+                                if not best_source_url:
+                                    best_source_url = url
+                        else:
+                            if not best_source_url:
+                                best_source_url = url
+
+            if best_source_url:
+                return best_source_url.strip()
 
         return None
 
